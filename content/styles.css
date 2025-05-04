@@ -1,0 +1,5 @@
+body[theme="dark"], 
+body[theme="dark"] div{
+    background-color: black !important;
+    color:aquamarine !important;
+}

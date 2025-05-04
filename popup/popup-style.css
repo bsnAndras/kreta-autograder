@@ -1,0 +1,36 @@
+body {
+    width: fit-content;
+    height: fit-content;
+    padding: 0;
+    background-color: rgba(207, 226,255, 1);
+}
+
+h1 {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    font-size: medium;
+    color: rgba(8, 65,150, 1);
+}
+
+button {
+    width: 9em;
+    height: 2.2em;
+    margin: 1em;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 2px 2px darkgray;
+    background-color: rgba(48, 168,203, 1);
+    color: white;
+    text-transform: uppercase;
+}
+button:disabled {
+    background-color: rgb(184, 184, 184);
+    color: rgb(216, 216, 216)
+}
+button:active {
+    background-color: rgb(29, 103, 126);
+    color: rgb(216, 216, 216);
+    transform:translate(2px, 2px);
+    box-shadow: none;
+}

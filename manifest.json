@@ -1,0 +1,21 @@
+{
+    "name": "Kréta Auto-grader",
+    "manifest_version": 3,
+    "version": "1.0.0",
+    "description": "An extension for make administration easier",
+    "permissions": ["tabs","activeTab","storage"],
+    "content_scripts": [
+        {
+            "matches": ["https://*.e-kreta.hu/*"],
+            "js": ["content/contentScript.js"],
+            "css": ["content/styles.css"]
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_title": "Kréta Auto-grader",
+        "default_popup": "popup/popup.html"
+    }
+}
