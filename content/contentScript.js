@@ -39,7 +39,7 @@ const observer = new MutationObserver((mutations) => {
 
 window.addEventListener("load", () => {
     console.log("window content loaded and ready.");
-    
+
     // Check if the TanuloErtekelesGrid table fully rendered
     let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody");
     while (!tableBody) {
@@ -49,12 +49,9 @@ window.addEventListener("load", () => {
         }, 1000);
     }
     
+    //Check for table mutation
+    observer.observe(tableBody, { childList: true, subtree: true });
     console.log('tableBody:', tableBody);
-    insertCheckboxes({ signal: AbortSignal.timeout(5000) })
-        .then(response => { console.log(response) })
-        .catch(error => {
-            console.error("Error inserting checkboxes:", error);
-        });
 });
 
 // Function to insert checkboxes into the table
