@@ -27,7 +27,7 @@ const observer = new MutationObserver((mutations) => {
 
     if (tableContentChanged) {
         console.log("Disconnecting observer.");
-        observer.disconnect();
+        observer.disconnect(); //TODO: need to reapply observer after content change, otherwise reload is needed after every group grading
 
         insertCheckboxes({ signal: AbortSignal.timeout(5000) })
             .then(response => { console.log(response) })
@@ -37,11 +37,11 @@ const observer = new MutationObserver((mutations) => {
     }
 });
 
-window.addEventListener("load", () => {
+window.addEventListener("load", () => { //TODO: should be page specific, it can break on other pages
     console.log("window content loaded and ready.");
 
     // Check if the TanuloErtekelesGrid table fully rendered
-    let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody");
+    let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody"); //TODO: something is going on at the table colgroup styling. The columns are off
     while (!tableBody) {
         console.error("TanuloErtekelesGrid table's tbody tag not found.");
         setTimeout(() => {
