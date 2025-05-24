@@ -1,8 +1,14 @@
+:root {
+    --accent-color: hsl(194, 62%, 49%);
+    --text-color: rgba(8, 65,150, 1);
+    --background-color: rgba(207, 226,255, 1);
+}
+
 body {
     width: fit-content;
     height: fit-content;
     padding: 0;
-    background-color: rgba(207, 226,255, 1);
+    background-color: var(--background-color)
 }
 
 h1 {
@@ -10,7 +16,7 @@ h1 {
     margin: 0;
     text-align: center;
     font-size: medium;
-    color: rgba(8, 65,150, 1);
+    color: var(--text-color);
 }
 
 button {
@@ -20,17 +26,21 @@ button {
     border: none;
     border-radius: 4px;
     box-shadow: 2px 2px darkgray;
-    background-color: rgba(48, 168,203, 1);
+    background-color: var(--accent-color);
     color: white;
     text-transform: uppercase;
+    cursor: pointer;
 }
-button:disabled {
-    background-color: rgb(184, 184, 184);
-    color: rgb(216, 216, 216)
+button:hover {
+    background-color: hsl(from var(--accent-color) h s 60%);
 }
-button:active {
-    background-color: rgb(29, 103, 126);
+button:active:not(:disabled) {
+    background-color: hsl(from var(--accent-color) h s 30%);
     color: rgb(216, 216, 216);
     transform:translate(2px, 2px);
     box-shadow: none;
+}
+button:disabled {
+    background-color: rgb(184, 184, 184);
+    color: rgb(216, 216, 216);
 }
