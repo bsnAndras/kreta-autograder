@@ -13,6 +13,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 });
 
+const observer = new MutationObserver((mutations) => {
+    let tableContentChanged = false;
+    console.log('mutations', mutations)
+    let i = 0;
+    for (const mutation of mutations) {
+        console.log('iter:', i++);
+        if (mutation.type === 'childList') {
+            console.log("Table mutation detected.");
+            tableContentChanged = true;
+        }
+    };
+
+    if (tableContentChanged) {
+        console.log("Disconnecting observer.");
+        observer.disconnect();
+
+        insertCheckboxes({ signal: AbortSignal.timeout(5000) })
+            .then(response => { console.log(response) })
+            .catch(error => {
+                console.error("Error inserting checkboxes:", error);
+            });
+    }
+});
+
 window.addEventListener("load", () => {
     console.log("window content loaded and ready.");
     
@@ -26,7 +50,7 @@ window.addEventListener("load", () => {
     }
     
     console.log('tableBody:', tableBody);
-    insertCheckboxes()
+    insertCheckboxes({ signal: AbortSignal.timeout(5000) })
         .then(response => { console.log(response) })
         .catch(error => {
             console.error("Error inserting checkboxes:", error);
@@ -34,10 +58,20 @@ window.addEventListener("load", () => {
 });
 
 // Function to insert checkboxes into the table
-async function insertCheckboxes() {
+async function insertCheckboxes({ signal }) {
     console.log("Inserting checkboxes into TanuloErtekelesGrid...");
 
     return new Promise((resolve, reject) => {
+        if (signal && signal.aborted) {
+            console.warn("Checkbox insertion aborted by signal at start of insertion process.");
+            reject(signal.reason);
+            return;
+        }
+        
+        signal.addEventListener('abort', () => {
+            console.warn("Checkbox insertion aborted.");
+            reject(signal.reason || "Checkbox insertion aborted.");
+        });
 
         const table = document.querySelector("table.TanuloErtekelesGrid");
         if (!table) {
@@ -78,6 +112,11 @@ async function insertCheckboxes() {
                 checkbox.checked = isChecked;
             });
         });
+
+        if(document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox").length > 1) {
+            signal.removeEventListener('abort', () => {});
+            resolve("Checkboxes inserted successfully.");
+        }
     });
 }
 
