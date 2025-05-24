@@ -13,6 +13,50 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 });
 
+window.addEventListener("load", () => {
+    console.log("window content loaded and ready.");
+    insertCheckboxes();
+});
+
+// Function to insert checkboxes into the table
+function insertCheckboxes() {
+    const table = document.querySelector("table.TanuloErtekelesGrid");
+    if (!table) {
+        console.error("TanuloErtekelesGrid table not found.");
+        return;
+    }
+
+    const headerRow = table.querySelector("tr");
+    if (!headerRow) {
+        console.error("Header row not found in TanuloErtekelesGrid table.");
+        return;
+    }
+
+    // Create a new header cell for the checkbox
+    const checkboxHeaderCell = document.createElement("th");
+    checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox">';
+    headerRow.insertBefore(checkboxHeaderCell, headerRow.firstChild);
+
+    // Add event listener to the "Select All" checkbox
+    const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+    selectAllCheckbox.addEventListener("change", (event) => {
+        const isChecked = event.target.checked;
+        const checkboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+
+    // Add checkboxes to each student row
+    const studentRows = table.querySelectorAll(".k-master-row");
+    studentRows.forEach(row => {
+        const checkboxCell = document.createElement("td");
+        checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
+        row.insertBefore(checkboxCell, row.firstChild);
+    });
+}
+
+// Function to automatically grade students in the TanuloErtekelesGrid
 async function autoGrade() {
     console.log("Autograding started...");
     const studentList = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row");
