@@ -16,10 +16,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 const observer = new MutationObserver((mutations) => {
     let tableContentChanged = false;
     console.log('mutations', mutations)
-    let i = 0;
+
     for (const mutation of mutations) {
-        console.log('iter:', i++);
-        if (mutation.type === 'childList') {
+        if (mutation.type === 'childList' && !tableContentChanged) {
             console.log("Table mutation detected.");
             tableContentChanged = true;
         }
@@ -29,7 +28,7 @@ const observer = new MutationObserver((mutations) => {
         console.log("Disconnecting observer.");
         observer.disconnect(); //TODO: need to reapply observer after content change, otherwise reload is needed after every group grading
 
-        insertCheckboxes({ signal: AbortSignal.timeout(5000) })
+        insertCheckboxes()
             .then(response => { console.log(response) })
             .catch(error => {
                 console.error("Error inserting checkboxes:", error);
@@ -46,7 +45,7 @@ window.addEventListener("load", () => {
     const intervalID = setInterval(() => {
         iterationCount++;
         tableBody = document.querySelector("table.TanuloErtekelesGrid tbody");
-        
+
         if (tableBody) {
             clearInterval(intervalID);
             //Check for table mutation
@@ -63,20 +62,10 @@ window.addEventListener("load", () => {
 });
 
 // Function to insert checkboxes into the table
-async function insertCheckboxes({ signal }) {
+async function insertCheckboxes() {
     console.log("Inserting checkboxes into TanuloErtekelesGrid...");
 
     return new Promise((resolve, reject) => {
-        if (signal && signal.aborted) {
-            console.warn("Checkbox insertion aborted by signal at start of insertion process.");
-            reject(signal.reason);
-            return;
-        }
-
-        signal.addEventListener('abort', () => {
-            console.warn("Checkbox insertion aborted.");
-            reject(signal.reason || "Checkbox insertion aborted.");
-        });
 
         const table = document.querySelector("table.TanuloErtekelesGrid");
         if (!table) {
@@ -100,7 +89,6 @@ async function insertCheckboxes({ signal }) {
 
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
-        console.log('studentRows:', studentRows)
         studentRows.forEach(row => {
             const checkboxCell = document.createElement("td");
             checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
@@ -118,8 +106,9 @@ async function insertCheckboxes({ signal }) {
             });
         });
 
-        if (document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox").length > 1) {
-            signal.removeEventListener('abort', () => { });
+        console.log('auto-grade-checkboxes', document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox"));
+        if (document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox").length > 1) {
+            observer.observe(table.querySelector("tbody"), { childList: true, subtree: true });
             resolve("Checkboxes inserted successfully.");
         }
     });
