@@ -42,16 +42,24 @@ window.addEventListener("load", () => { //TODO: should be page specific, it can 
 
     // Check if the TanuloErtekelesGrid table fully rendered
     let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody"); //TODO: something is going on at the table colgroup styling. The columns are off
-    while (!tableBody) {
-        console.error("TanuloErtekelesGrid table's tbody tag not found.");
-        setTimeout(() => {
-            tableBody = document.querySelector("table.TanuloErtekelesGrid tbody");
-        }, 1000);
-    }
-    
-    //Check for table mutation
-    observer.observe(tableBody, { childList: true, subtree: true });
-    console.log('tableBody:', tableBody);
+    let iterationCount = 0;
+    const intervalID = setInterval(() => {
+        iterationCount++;
+        tableBody = document.querySelector("table.TanuloErtekelesGrid tbody");
+        
+        if (tableBody) {
+            clearInterval(intervalID);
+            //Check for table mutation
+            observer.observe(tableBody, { childList: true, subtree: true });
+            console.log('tableBody:', tableBody);
+        } else if (iterationCount > 10) {
+            clearInterval(intervalID);
+            console.error("TanuloErtekelesGrid table's tbody tag not found.");
+            return;
+        } else {
+            console.error("TanuloErtekelesGrid table's tbody tag not found. Retrying...");
+        }
+    }, 500);
 });
 
 // Function to insert checkboxes into the table
@@ -64,7 +72,7 @@ async function insertCheckboxes({ signal }) {
             reject(signal.reason);
             return;
         }
-        
+
         signal.addEventListener('abort', () => {
             console.warn("Checkbox insertion aborted.");
             reject(signal.reason || "Checkbox insertion aborted.");
@@ -99,7 +107,7 @@ async function insertCheckboxes({ signal }) {
             row.insertBefore(checkboxCell, row.firstChild);
             console.log("Checkbox added to student row:", row);
         });
-        
+
         // Add event listener to the "Select All" checkbox
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
         selectAllCheckbox.addEventListener("change", (event) => {
@@ -110,8 +118,8 @@ async function insertCheckboxes({ signal }) {
             });
         });
 
-        if(document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox").length > 1) {
-            signal.removeEventListener('abort', () => {});
+        if (document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox").length > 1) {
+            signal.removeEventListener('abort', () => { });
             resolve("Checkboxes inserted successfully.");
         }
     });
