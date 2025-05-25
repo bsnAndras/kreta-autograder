@@ -26,7 +26,7 @@ const observer = new MutationObserver((mutations) => {
 
     if (tableContentChanged) {
         console.log("Disconnecting observer.");
-        observer.disconnect(); //TODO: need to reapply observer after content change, otherwise reload is needed after every group grading
+        observer.disconnect();
 
         insertCheckboxes()
             .then(response => { console.log(response) })
@@ -82,10 +82,12 @@ async function insertCheckboxes() {
         }
 
         // Create a new header cell for the checkbox
-        const checkboxHeaderCell = document.createElement("th");
-        checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
-        headerRow.insertBefore(checkboxHeaderCell, headerRow.firstChild);
-        console.log("Checkbox header cell added.");
+        if (!headerRow.querySelector("input.auto-grade-checkbox")) {
+            const checkboxHeaderCell = document.createElement("th");
+            checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
+            headerRow.insertBefore(checkboxHeaderCell, headerRow.firstChild);
+            console.log("Checkbox header cell added.");
+        }
 
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
@@ -108,9 +110,10 @@ async function insertCheckboxes() {
 
         console.log('auto-grade-checkboxes', document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox"));
         if (document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox").length > 1) {
-            observer.observe(table.querySelector("tbody"), { childList: true, subtree: true });
             resolve("Checkboxes inserted successfully.");
         }
+
+        observer.observe(table.querySelector("tbody"), { childList: true, subtree: true });
     });
 }
 
