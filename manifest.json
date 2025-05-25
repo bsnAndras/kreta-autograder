@@ -6,7 +6,7 @@
     "permissions": ["tabs","activeTab","storage"],
     "content_scripts": [
         {
-            "matches": ["https://*.e-kreta.hu/*"],
+            "matches": ["https://*.e-kreta.hu/TanuloErtekeles/Ertekeles/*"],
             "js": ["content/contentScript.js"],
             "css": ["content/styles.css"]
         }

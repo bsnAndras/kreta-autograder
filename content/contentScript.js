@@ -37,7 +37,7 @@ const observer = new MutationObserver((mutations) => {
     }
 });
 
-window.addEventListener("load", () => { //TODO: should be page specific, it can break on other pages
+window.addEventListener("load", () => {
     console.log("window content loaded and ready.");
 
     // Check if the TanuloErtekelesGrid table fully rendered
