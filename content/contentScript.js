@@ -85,7 +85,7 @@ async function insertCheckboxes() {
         if (!headerRow.querySelector("input.auto-grade-checkbox")) {
             const checkboxHeaderCell = document.createElement("th");
             checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
-            headerRow.insertBefore(checkboxHeaderCell, headerRow.firstChild);
+            headerRow.insertAdjacentElement("beforeend",checkboxHeaderCell);
             console.log("Checkbox header cell added.");
         }
 
@@ -94,7 +94,7 @@ async function insertCheckboxes() {
         studentRows.forEach(row => {
             const checkboxCell = document.createElement("td");
             checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
-            row.insertBefore(checkboxCell, row.firstChild);
+            row.insertAdjacentElement("beforeend",checkboxCell);
             console.log("Checkbox added to student row:", row);
         });
 
@@ -121,9 +121,10 @@ async function insertCheckboxes() {
 async function autoGrade() {
     console.log("Autograding started...");
     const studentList = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row");
-    if (studentList.length > 0) {
+    const selectedStudents = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row:has(input.auto-grade-checkbox:checked)");
+    if (selectedStudents.length > 0) {
         try {
-            for (const studentRow of studentList) {
+            for (const studentRow of selectedStudents) {
                 await editRow(studentRow)
                     .then(response => console.log(response));
             }
