@@ -13,7 +13,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 });
 
-const observer = new MutationObserver((mutations) => {
+const tableBodyObserver = new MutationObserver(handleTableMutation);
+
+function handleTableMutation(mutations, observer) {
     let tableContentChanged = false;
     console.log('mutations', mutations)
 
@@ -28,13 +30,13 @@ const observer = new MutationObserver((mutations) => {
         console.log("Disconnecting observer.");
         observer.disconnect();
 
-        insertCheckboxes()
+        insertCheckboxes() //observer will be reconnected after the checkboxes are inserted in this method
             .then(response => { console.log(response) })
             .catch(error => {
                 console.error("Error inserting checkboxes:", error);
-            });
+            })
     }
-});
+}
 
 window.addEventListener("load", () => {
     console.log("window content loaded and ready.");
@@ -49,7 +51,7 @@ window.addEventListener("load", () => {
         if (tableBody) {
             clearInterval(intervalID);
             //Check for table mutation
-            observer.observe(tableBody, { childList: true, subtree: true });
+            tableBodyObserver.observe(tableBody, { childList: true, subtree: true });
             console.log('tableBody:', tableBody);
         } else if (iterationCount > 10) {
             clearInterval(intervalID);
@@ -85,7 +87,7 @@ async function insertCheckboxes() {
         if (!headerRow.querySelector("input.auto-grade-checkbox")) {
             const checkboxHeaderCell = document.createElement("th");
             checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
-            headerRow.insertAdjacentElement("beforeend",checkboxHeaderCell);
+            headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
             console.log("Checkbox header cell added.");
         }
 
@@ -94,7 +96,7 @@ async function insertCheckboxes() {
         studentRows.forEach(row => {
             const checkboxCell = document.createElement("td");
             checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
-            row.insertAdjacentElement("beforeend",checkboxCell);
+            row.insertAdjacentElement("beforeend", checkboxCell);
             console.log("Checkbox added to student row:", row);
         });
 
@@ -108,12 +110,13 @@ async function insertCheckboxes() {
             });
         });
 
-        console.log('auto-grade-checkboxes', document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox"));
         if (document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox").length > 1) {
             resolve("Checkboxes inserted successfully.");
+        } else {
+            reject("Failed to insert checkboxes.");
         }
 
-        observer.observe(table.querySelector("tbody"), { childList: true, subtree: true });
+        tableBodyObserver.observe(table.querySelector("tbody"), { childList: true, subtree: true });
     });
 }
 

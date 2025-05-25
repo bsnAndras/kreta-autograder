@@ -2,10 +2,14 @@
     color-scheme: light dark;
 }
 
-tr:has(.auto-grade-checkbox:checked) {
-    background-color: hsl(186, 70%, 82%);
+table {
+    border-collapse: collapse;
 }
 
-.k-grid tr:hover {
-    background-color: default !important;
+table *{
+    width: initial;
+}
+
+tr:has(.auto-grade-checkbox:checked) {
+    background-color: hsl(186, 70%, 82%)
 }
