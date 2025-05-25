@@ -1,5 +1,11 @@
-body[theme="dark"], 
-body[theme="dark"] div{
-    background-color: black !important;
-    color:aquamarine !important;
+:root {
+    color-scheme: light dark;
+}
+
+tr:has(.auto-grade-checkbox:checked) {
+    background-color: hsl(186, 70%, 82%);
+}
+
+.k-grid tr:hover {
+    background-color: default !important;
 }
