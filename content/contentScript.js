@@ -94,10 +94,12 @@ async function insertCheckboxes() {
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
         studentRows.forEach(row => {
-            const checkboxCell = document.createElement("td");
-            checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
-            row.insertAdjacentElement("beforeend", checkboxCell);
-            console.log("Checkbox added to student row:", row);
+            if (!row.querySelector("input.auto-grade-checkbox")) {
+                const checkboxCell = document.createElement("td");
+                checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
+                row.insertAdjacentElement("beforeend", checkboxCell);
+                console.log("Checkbox added to student row:", row);
+            }
         });
 
         // Add event listener to the "Select All" checkbox
