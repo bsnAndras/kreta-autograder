@@ -10,9 +10,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 break;
             };
             case "autoGrade": {
-                console.log("AutoGrade request arrived from", message.fromFile);
+                console.log("AutoGrade request arrived:", message);
 
-                chrome.tabs.sendMessage(message.tab.id, { request: "autoGrade", fromFile: "background.js" })
+                chrome.tabs.sendMessage(message.tab.id, { request: "autoGrade", grade: message.grade, fromFile: "background.js" })
                     .then((response) => {
                         sendResponse(`AutoGrade response from tab ${message.tab.id}: ${response}`);
                     })

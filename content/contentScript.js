@@ -1,8 +1,8 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.request) {
         case "autoGrade": {
-            console.log("autoGrade request arrived from", message.fromFile)
-            autoGrade();
+            console.log("autoGrade request arrived:", message)
+            autoGrade(message.grade);
             sendResponse("Autograde completed.");
             break;
         };
@@ -123,14 +123,14 @@ async function insertCheckboxes() {
 }
 
 // Function to automatically grade students in the TanuloErtekelesGrid
-async function autoGrade() {
+async function autoGrade(gradeId) {
     console.log("Autograding started...");
     const studentList = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row");
     const selectedStudents = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row:has(input.auto-grade-checkbox:checked)");
     if (selectedStudents.length > 0) {
         try {
             for (const studentRow of selectedStudents) {
-                await editRow(studentRow)
+                await editRow(studentRow,gradeId)
                     .then(response => console.log(response));
             }
         } catch (error) {
@@ -142,10 +142,14 @@ async function autoGrade() {
     }
 }
 
-async function editRow(row) {
+async function editRow(row,gradeId) {
     return new Promise((resolve, reject) => {
         const studentName = row.children[2].querySelector('a').dataset.tanulonev;
-        let grade;
+        let grade = {
+            id: gradeId,
+            textContent: undefined,
+            element: undefined
+        };
 
         console.log(`Editing ${studentName}...`);
         // open the edit dialog
@@ -154,23 +158,49 @@ async function editRow(row) {
             // select dropdown menu for grade selection
             document.querySelector('#TanuloErtekelesMondatbankItemSelectForm .k-dropdown-wrap .k-select>span').click();
 
-            //find the "kiv. telj." option
-            const gradingsList = document.querySelectorAll('#MondatbankSelectPopupId_listbox li.k-item');
-            gradingsList.forEach((gradeOption) => {
-                if (gradeOption.textContent.match(/^kiv.+$/)) {
-                    grade = gradeOption.textContent;
-                    gradeOption.click();
-                    return;
-                }
-            });
+            //find the selected option and select the grade
+            grade = findGradeOption(gradeId);
+            grade.element.click();
 
             //submit
             document.querySelector('#ErtekelesMondatbankSelectPopupSelectButton').click();
-            if (grade) {
-                resolve(`${studentName} has been autograded. Grade selected: ${grade}`);
+            if (grade.textContent) {
+                resolve(`${studentName} has been autograded. Grade selected: ${grade.textContent}`);
             } else {
                 reject('No grade selected.');
             }
         }, 500)
     });
+}
+
+function findGradeOption(gradeId) {
+    gradingTable = new Map(
+        [
+            ["k.t",{regex: /^.*kiv.+$/, text: "kiv - kiválóan teljesített"}],
+            ["j.t",{regex: /^.*jól.+$/, text: "j.t - jól teljesített"}],
+            ["m.t",{regex: /^.+megf.+$/, text: "m.t - megfelelően teljesített"}],
+            ["f",{regex: /^.*felz.+$/, text: "f - felzárkózásra szorul"}],
+            ["o.f",{regex: /^.+folyt.+$/, text: "o.f - osztályát folytatja"}],
+            ["n.é",{regex: /^(n\.é)|(.*[n,N]em).+$/, text: "n.é - Nem értékelhető"}]
+        ]
+    )
+
+    const grade = {
+        id: gradeId,
+        regex: gradingTable.get(gradeId).regex,
+        textContent: gradingTable.get(gradeId).text,
+        element: undefined
+    }
+
+    const gradeOptions = document.querySelectorAll('#MondatbankSelectPopupId_listbox li.k-item');
+    for (const option of gradeOptions) {
+        if (option.textContent.match(grade.regex)) {
+            grade.textContent = option.textContent;
+            grade.element = option;
+            console.log(`Grade option found: ${grade}`);
+            return { gradeId, textContent: grade.textContent, element: grade.element };
+        }
+    }
+    console.error(`Grade option of "${gradeId}" not found.`);
+    return { gradeId, textContent: grade.textContent, element: grade.element };
 }
