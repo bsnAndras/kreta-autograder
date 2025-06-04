@@ -27,7 +27,7 @@ function handleTableMutation(mutations, observer) {
     };
 
     if (tableContentChanged) {
-        console.log("Disconnecting observer.");
+        // console.log("Disconnecting observer.");
         observer.disconnect();
 
         insertCheckboxes() //observer will be reconnected after the checkboxes are inserted in this method
@@ -39,7 +39,7 @@ function handleTableMutation(mutations, observer) {
 }
 
 window.addEventListener("load", () => {
-    console.log("window content loaded and ready.");
+    // console.log("window content loaded and ready.");
 
     // Check if the TanuloErtekelesGrid table fully rendered
     let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody"); //TODO: something is going on at the table colgroup styling. The columns are off
@@ -88,7 +88,6 @@ async function insertCheckboxes() {
             const checkboxHeaderCell = document.createElement("th");
             checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
             headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
-            console.log("Checkbox header cell added.");
         }
 
         // Add checkboxes to each student row
@@ -98,7 +97,6 @@ async function insertCheckboxes() {
                 const checkboxCell = document.createElement("td");
                 checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
                 row.insertAdjacentElement("beforeend", checkboxCell);
-                console.log("Checkbox added to student row:", row);
             }
         });
 
