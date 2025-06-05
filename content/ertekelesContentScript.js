@@ -95,18 +95,18 @@ async function insertGradingCheckboxes() {
             const checkboxHeaderCell = document.createElement("th");
             checkboxHeaderCell.id = "select-all-checkbox-cell";
             checkboxHeaderCell.className = "auto-grade-cell";
-            const gradingBlock = createGradingBlock();
+            const gradingBlock = createGradingBlock("header");
             checkboxHeaderCell.appendChild(gradingBlock);
             headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
         }
 
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
-        studentRows.forEach(row => {
+        studentRows.forEach((row,id) => {
             if (!row.querySelector(".auto-grade-cell")) {
                 const checkboxCell = document.createElement("td");
                 checkboxCell.className = "auto-grade-cell";
-                const gradingBlock = createGradingBlock();
+                const gradingBlock = createGradingBlock(id);
                 checkboxCell.appendChild(gradingBlock);
                 row.insertAdjacentElement("beforeend", checkboxCell);
             }
@@ -149,7 +149,7 @@ async function insertGradingCheckboxes() {
     });
 }
 
-function createGradingBlock() {
+function createGradingBlock(rowId) {
     const gradingBlock = document.createElement("div");
     gradingBlock.className = "auto-grade-wrapper";
     const gradingOptions = ['k.t', 'j.t', 'm.t', 'f', 'o.f', 'n.é'];
@@ -159,7 +159,7 @@ function createGradingBlock() {
         const gradingTile = document.createElement("label");
         gradingTile.className = "auto-grade-tile";
         gradingTile.textContent = gradingOptions[i];
-        gradingTile.innerHTML += `<input type="checkbox" class="auto-grade-checkbox" data-grade-id="${gradingOptions[i]}">`;
+        gradingTile.innerHTML += `<input type="checkbox" class="auto-grade-checkbox" data-grade-id="${gradingOptions[i]}" id="autogradeCheckbox-${gradingOptions[i]}-${rowId}">`;
         gradingBlock.appendChild(gradingTile);
         const checkbox = gradingTile.querySelector("input.auto-grade-checkbox");
         checkbox.addEventListener("change", (event) => {
