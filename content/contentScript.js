@@ -88,28 +88,28 @@ async function insertGradingCheckboxes() {
             colgroup.appendChild(autoGradeCol);
         }
 
-        // const headerRow = table.querySelector("thead tr");
-        // if (!headerRow) {
-        //     console.error("Header row not found in TanuloErtekelesGrid table.");
-        //     reject("Header row not found in TanuloErtekelesGrid table.");
-        //     return;
-        // }
+        const headerRow = table.querySelector("thead tr");
+        if (!headerRow) {
+            console.error("Header row not found in TanuloErtekelesGrid table.");
+            reject("Header row not found in TanuloErtekelesGrid table.");
+            return;
+        }
 
 
         // // Create a new header cell for the checkbox
-        // if (!headerRow.querySelector(".auto-grade-checkbox")) {
-        //     const checkboxHeaderCell = document.createElement("th");
-        //     checkboxHeaderCell.id = "selectAllCheckbox";
-        //     checkboxHeaderCell.className = "auto-grade-cell";
-        //     const gradingBlock = createGradingBlock();
-        //     checkboxHeaderCell.appendChild(gradingBlock);
-        //     headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
-        // }
+        if (!headerRow.querySelector(".auto-grade-cell")) {
+            const checkboxHeaderCell = document.createElement("th");
+            checkboxHeaderCell.id = "selectAllCheckbox";
+            checkboxHeaderCell.className = "auto-grade-cell";
+            const gradingBlock = createGradingBlock();
+            checkboxHeaderCell.appendChild(gradingBlock);
+            headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
+        }
 
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
         studentRows.forEach(row => {
-            if (!row.querySelector(".auto-grade-checkbox")) {
+            if (!row.querySelector(".auto-grade-cell")) {
                 const checkboxCell = document.createElement("td");
                 checkboxCell.className = "auto-grade-cell";
                 const gradingBlock = createGradingBlock();

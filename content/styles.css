@@ -10,7 +10,7 @@ table *{
     width: initial;
 }
 
-tr:has(.auto-grade-checkbox:checked) {
+tbody tr:has(.auto-grade-checkbox:checked) {
     background-color: hsl(186, 70%, 82%)
 }
 
@@ -39,6 +39,7 @@ auto-grade-col {
     flex: 0 0 auto;
     border: 1px solid hsla(201, 39%, 44%, 0.342);
     cursor: pointer;
+    user-select: none;
 }
 
 .auto-grade-tile:has(.auto-grade-checkbox:checked) {
