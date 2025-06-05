@@ -99,7 +99,7 @@ async function insertGradingCheckboxes() {
         // // Create a new header cell for the checkbox
         if (!headerRow.querySelector(".auto-grade-cell")) {
             const checkboxHeaderCell = document.createElement("th");
-            checkboxHeaderCell.id = "selectAllCheckbox";
+            checkboxHeaderCell.id = "select-all-checkbox-cell";
             checkboxHeaderCell.className = "auto-grade-cell";
             const gradingBlock = createGradingBlock();
             checkboxHeaderCell.appendChild(gradingBlock);
@@ -119,14 +119,28 @@ async function insertGradingCheckboxes() {
         });
 
         // Add event listener to the "Select All" checkbox
-        // const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-        // selectAllCheckbox.addEventListener("change", (event) => {
-        //     const isChecked = event.target.checked;
-        //     const checkboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
-        //     checkboxes.forEach(checkbox => {
-        //         checkbox.checked = isChecked;
-        //     });
-        // });
+        const selectAllCheckboxWrapper = document.querySelector("#select-all-checkbox-cell div.auto-grade-wrapper");
+        if (selectAllCheckboxWrapper) {
+
+            selectAllCheckboxWrapper.querySelectorAll("input.auto-grade-checkbox").forEach(selectAllCheckbox => {
+
+                selectAllCheckbox.addEventListener("change", (event) => {
+                    const isChecked = event.target.checked;
+                    const tbodyCheckboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
+
+                    tbodyCheckboxes.forEach(checkbox => {
+                        if (checkbox.dataset.gradeId === selectAllCheckbox.dataset.gradeId) {
+                            checkbox.checked = isChecked;
+                        } else {
+                            checkbox.checked = false;
+                        }
+                    });
+                });
+            });
+
+        } else {
+            console.warn("Select all checkbox cell not found.");
+        }
 
         if (document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox").length > 1) {
             resolve("Checkboxes inserted successfully.");
@@ -141,10 +155,10 @@ async function insertGradingCheckboxes() {
 function createGradingBlock() {
     const gradingBlock = document.createElement("div");
     gradingBlock.className = "auto-grade-wrapper";
+    const gradingOptions = ['k.t', 'j.t', 'm.t', 'f', 'o.f', 'n.é'];
 
     // Create the checkboxes
     for (let i = 0; i < 6; i++) {
-        const gradingOptions = ['k.t', 'j.t', 'm.t', 'f', 'o.f', 'n.é'];
         const gradingTile = document.createElement("label");
         gradingTile.className = "auto-grade-tile";
         gradingTile.textContent = gradingOptions[i];
