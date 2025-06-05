@@ -126,14 +126,17 @@ async function insertGradingCheckboxes() {
 
                 selectAllCheckbox.addEventListener("change", (event) => {
                     const isChecked = event.target.checked;
-                    const tbodyCheckboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
+                    const tbodyCheckboxes = document.querySelectorAll("table.TanuloErtekelesGrid tbody input.auto-grade-checkbox");
+                    const sameGradeCheckboxes = document.querySelectorAll(`tbody input.auto-grade-checkbox[data-grade-id="${selectAllCheckbox.dataset.gradeId}"]`);
 
                     tbodyCheckboxes.forEach(checkbox => {
-                        if (checkbox.dataset.gradeId === selectAllCheckbox.dataset.gradeId) {
-                            checkbox.checked = isChecked;
-                        } else {
+                        if (checkbox.dataset.gradeId !== selectAllCheckbox.dataset.gradeId) {
                             checkbox.checked = false;
                         }
+                    });
+
+                    sameGradeCheckboxes.forEach(checkbox => {
+                        checkbox.checked = isChecked;
                     });
                 });
             });
