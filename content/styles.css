@@ -13,3 +13,44 @@ table *{
 tr:has(.auto-grade-checkbox:checked) {
     background-color: hsl(186, 70%, 82%)
 }
+
+auto-grade-col {
+    width: 20em;
+}
+
+.auto-grade-cell {
+    width: 100%;
+}
+
+.auto-grade-wrapper {
+    width: 20em;
+    display: inline flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 0.5rem;
+}
+
+.auto-grade-tile {
+    width: 1.75em;
+    height: 1.75em;
+    padding: 0.275rem;
+    flex: 0 0 auto;
+    border: 1px solid hsla(201, 39%, 44%, 0.342);
+    cursor: pointer;
+}
+
+.auto-grade-tile:has(.auto-grade-checkbox:checked) {
+background-color: hsl(201, 58%, 57%);
+    color: white;
+}
+
+.auto-grade-checkbox {
+    appearance: none;
+    user-select: none;
+}
+
+.auto-grade-checkbox:focus-visible {
+    outline: none;
+}

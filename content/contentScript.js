@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.request) {
         case "autoGrade": {
             console.log("autoGrade request arrived:", message)
-            autoGrade(message.grade);
+            autoGrade();
             sendResponse("Autograde completed.");
             break;
         };
@@ -17,7 +17,7 @@ const tableBodyObserver = new MutationObserver(handleTableMutation);
 
 function handleTableMutation(mutations, observer) {
     let tableContentChanged = false;
-    console.log('mutations', mutations)
+    // console.log('mutations', mutations)
 
     for (const mutation of mutations) {
         if (mutation.type === 'childList' && !tableContentChanged) {
@@ -30,7 +30,7 @@ function handleTableMutation(mutations, observer) {
         // console.log("Disconnecting observer.");
         observer.disconnect();
 
-        insertCheckboxes() //observer will be reconnected after the checkboxes are inserted in this method
+        insertGradingCheckboxes() //observer will be reconnected after the checkboxes are inserted in this method
             .then(response => { console.log(response) })
             .catch(error => {
                 console.error("Error inserting checkboxes:", error);
@@ -64,7 +64,7 @@ window.addEventListener("load", () => {
 });
 
 // Function to insert checkboxes into the table
-async function insertCheckboxes() {
+async function insertGradingCheckboxes() {
     console.log("Inserting checkboxes into TanuloErtekelesGrid...");
 
     return new Promise((resolve, reject) => {
@@ -76,39 +76,57 @@ async function insertCheckboxes() {
             return;
         }
 
-        const headerRow = table.querySelector("tr");
-        if (!headerRow) {
-            console.error("Header row not found in TanuloErtekelesGrid table.");
-            reject("Header row not found in TanuloErtekelesGrid table.");
+        const colgroup = table.querySelector("colgroup");
+        if (!colgroup) {
+            console.warn("Colgroup not found in TanuloErtekelesGrid table.");
             return;
         }
 
-        // Create a new header cell for the checkbox
-        if (!headerRow.querySelector("input.auto-grade-checkbox")) {
-            const checkboxHeaderCell = document.createElement("th");
-            checkboxHeaderCell.innerHTML = '<input type="checkbox" id="selectAllCheckbox" class="auto-grade-checkbox">';
-            headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
+        if (!colgroup.querySelector("col.auto-grade-col")) {
+            const autoGradeCol = document.createElement("col");
+            autoGradeCol.className = "auto-grade-col";
+            colgroup.appendChild(autoGradeCol);
         }
+
+        // const headerRow = table.querySelector("thead tr");
+        // if (!headerRow) {
+        //     console.error("Header row not found in TanuloErtekelesGrid table.");
+        //     reject("Header row not found in TanuloErtekelesGrid table.");
+        //     return;
+        // }
+
+
+        // // Create a new header cell for the checkbox
+        // if (!headerRow.querySelector(".auto-grade-checkbox")) {
+        //     const checkboxHeaderCell = document.createElement("th");
+        //     checkboxHeaderCell.id = "selectAllCheckbox";
+        //     checkboxHeaderCell.className = "auto-grade-cell";
+        //     const gradingBlock = createGradingBlock();
+        //     checkboxHeaderCell.appendChild(gradingBlock);
+        //     headerRow.insertAdjacentElement("beforeend", checkboxHeaderCell);
+        // }
 
         // Add checkboxes to each student row
         const studentRows = table.querySelectorAll(".k-master-row");
         studentRows.forEach(row => {
-            if (!row.querySelector("input.auto-grade-checkbox")) {
+            if (!row.querySelector(".auto-grade-checkbox")) {
                 const checkboxCell = document.createElement("td");
-                checkboxCell.innerHTML = '<input type="checkbox" class="auto-grade-checkbox">';
+                checkboxCell.className = "auto-grade-cell";
+                const gradingBlock = createGradingBlock();
+                checkboxCell.appendChild(gradingBlock);
                 row.insertAdjacentElement("beforeend", checkboxCell);
             }
         });
 
         // Add event listener to the "Select All" checkbox
-        const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-        selectAllCheckbox.addEventListener("change", (event) => {
-            const isChecked = event.target.checked;
-            const checkboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = isChecked;
-            });
-        });
+        // const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+        // selectAllCheckbox.addEventListener("change", (event) => {
+        //     const isChecked = event.target.checked;
+        //     const checkboxes = document.querySelectorAll("table.TanuloErtekelesGrid .k-master-row input.auto-grade-checkbox");
+        //     checkboxes.forEach(checkbox => {
+        //         checkbox.checked = isChecked;
+        //     });
+        // });
 
         if (document.querySelectorAll("table.TanuloErtekelesGrid input.auto-grade-checkbox").length > 1) {
             resolve("Checkboxes inserted successfully.");
@@ -120,15 +138,46 @@ async function insertCheckboxes() {
     });
 }
 
+function createGradingBlock() {
+    const gradingBlock = document.createElement("div");
+    gradingBlock.className = "auto-grade-wrapper";
+
+    // Create the checkboxes
+    for (let i = 0; i < 6; i++) {
+        const gradingOptions = ['k.t', 'j.t', 'm.t', 'f', 'o.f', 'n.é'];
+        const gradingTile = document.createElement("label");
+        gradingTile.className = "auto-grade-tile";
+        gradingTile.textContent = gradingOptions[i];
+        gradingTile.innerHTML += `<input type="checkbox" class="auto-grade-checkbox" data-grade-id="${gradingOptions[i]}">`;
+        gradingBlock.appendChild(gradingTile);
+        const checkbox = gradingTile.querySelector("input.auto-grade-checkbox");
+        checkbox.addEventListener("change", (event) => {
+            const isChecked = event.target.checked;
+            if (isChecked) {
+                // Uncheck all other checkboxes in the same grading block
+                const otherCheckboxes = gradingBlock.querySelectorAll("input.auto-grade-checkbox");
+                otherCheckboxes.forEach(otherCheckbox => {
+                    if (otherCheckbox !== checkbox) {
+                        otherCheckbox.checked = false;
+                    }
+                });
+            }
+        })
+    }
+
+    return gradingBlock;
+}
+
 // Function to automatically grade students in the TanuloErtekelesGrid
-async function autoGrade(gradeId) {
+async function autoGrade() {
     console.log("Autograding started...");
     const studentList = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row");
     const selectedStudents = document.querySelectorAll(".TanuloErtekelesGrid .k-master-row:has(input.auto-grade-checkbox:checked)");
     if (selectedStudents.length > 0) {
         try {
             for (const studentRow of selectedStudents) {
-                await editRow(studentRow,gradeId)
+                const gradeId = studentRow.querySelector("input.auto-grade-checkbox:checked").dataset.gradeId;
+                await editRow(studentRow, gradeId)
                     .then(response => console.log(response));
             }
         } catch (error) {
@@ -140,7 +189,7 @@ async function autoGrade(gradeId) {
     }
 }
 
-async function editRow(row,gradeId) {
+async function editRow(row, gradeId) {
     return new Promise((resolve, reject) => {
         const studentName = row.children[2].querySelector('a').dataset.tanulonev;
         let grade = {
@@ -174,12 +223,12 @@ async function editRow(row,gradeId) {
 function findGradeOption(gradeId) {
     gradingTable = new Map(
         [
-            ["k.t",{regex: /^.*kiv.+$/, text: "kiv - kiválóan teljesített"}],
-            ["j.t",{regex: /^.*jól.+$/, text: "j.t - jól teljesített"}],
-            ["m.t",{regex: /^.+megf.+$/, text: "m.t - megfelelően teljesített"}],
-            ["f",{regex: /^.*felz.+$/, text: "f - felzárkózásra szorul"}],
-            ["o.f",{regex: /^.+folyt.+$/, text: "o.f - osztályát folytatja"}],
-            ["n.é",{regex: /^(n\.é)|(.*[n,N]em).+$/, text: "n.é - Nem értékelhető"}]
+            ["k.t", { regex: /^.*kiv.+$/, text: "kiv - kiválóan teljesített" }],
+            ["j.t", { regex: /^.*jól.+$/, text: "j.t - jól teljesített" }],
+            ["m.t", { regex: /^.+megf.+$/, text: "m.t - megfelelően teljesített" }],
+            ["f", { regex: /^.*felz.+$/, text: "f - felzárkózásra szorul" }],
+            ["o.f", { regex: /^.+folyt.+$/, text: "o.f - osztályát folytatja" }],
+            ["n.é", { regex: /^(n\.é)|(.*[n,N]em).+$/, text: "n.é - Nem értékelhető" }]
         ]
     )
 
