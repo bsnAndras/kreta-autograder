@@ -17,17 +17,14 @@ const tableBodyObserver = new MutationObserver(handleTableMutation);
 
 function handleTableMutation(mutations, observer) {
     let tableContentChanged = false;
-    // console.log('mutations', mutations)
 
     for (const mutation of mutations) {
         if (mutation.type === 'childList' && !tableContentChanged) {
-            console.log("Table mutation detected.");
             tableContentChanged = true;
         }
     };
 
     if (tableContentChanged) {
-        // console.log("Disconnecting observer.");
         observer.disconnect();
 
         insertGradingCheckboxes() //observer will be reconnected after the checkboxes are inserted in this method
@@ -39,7 +36,6 @@ function handleTableMutation(mutations, observer) {
 }
 
 window.addEventListener("load", () => {
-    // console.log("window content loaded and ready.");
 
     // Check if the TanuloErtekelesGrid table fully rendered
     let tableBody = document.querySelector("table.TanuloErtekelesGrid tbody"); //TODO: something is going on at the table colgroup styling. The columns are off
@@ -52,7 +48,6 @@ window.addEventListener("load", () => {
             clearInterval(intervalID);
             //Check for table mutation
             tableBodyObserver.observe(tableBody, { childList: true, subtree: true });
-            console.log('tableBody:', tableBody);
         } else if (iterationCount > 10) {
             clearInterval(intervalID);
             console.error("TanuloErtekelesGrid table's tbody tag not found.");
@@ -65,7 +60,6 @@ window.addEventListener("load", () => {
 
 // Function to insert checkboxes into the table
 async function insertGradingCheckboxes() {
-    console.log("Inserting checkboxes into TanuloErtekelesGrid...");
 
     return new Promise((resolve, reject) => {
 
@@ -215,7 +209,6 @@ async function editRow(row, gradeId) {
             element: undefined
         };
 
-        console.log(`Editing ${studentName}...`);
         // open the edit dialog
         row.querySelector('.rowFunction a').click();
         setTimeout(() => {
@@ -261,7 +254,6 @@ function findGradeOption(gradeId) {
         if (option.textContent.match(grade.regex)) {
             grade.textContent = option.textContent;
             grade.element = option;
-            console.log(`Grade option found: ${grade}`);
             return { gradeId, textContent: grade.textContent, element: grade.element };
         }
     }
